@@ -1,12 +1,75 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { NCard, NTabs, NTabPane, NList, NListItem, NAvatar, NButton, NInput, NEmpty } from 'naive-ui';
+import { NCard, NTabs, NTabPane, NList, NListItem, NAvatar, NButton, NInput, NEmpty, NTag, NSpace, useMessage } from 'naive-ui';
 import type { ModernProfile } from '../../../../../types/core';
 
 const props = defineProps<{
   avatarId: string;
   profile: ModernProfile;
 }>();
+
+const message = useMessage();
+const loading = ref(false);
+const currentEncounter = ref<any>(null);
+
+const handleSwipe = async () => {
+  if (props.profile.energy < 15) {
+      message.warning("精力不足 (需要 15 点)");
+      return;
+  }
+  loading.value = true;
+  try {
+    const res = await fetch('/api/social/swipe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ avatar_id: props.avatarId })
+    });
+    const data = await res.json();
+    if (data.error) {
+        message.error(data.error);
+    } else {
+        currentEncounter.value = data.encounter;
+        if (data.remaining_energy !== undefined) {
+            props.profile.energy = data.remaining_energy;
+        }
+    }
+  } catch (e) {
+      message.error("网络错误");
+  } finally {
+      loading.value = false;
+  }
+};
+
+const handleIceBreak = async (type: string) => {
+    if (!currentEncounter.value) return;
+    loading.value = true;
+    try {
+        const res = await fetch('/api/social/ice-break', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                avatar_id: props.avatarId,
+                encounter_id: currentEncounter.value.id,
+                choice_type: type
+            })
+        });
+        const data = await res.json();
+        if (data.success) {
+            message.success("加好友成功！已添加到通讯录");
+            currentEncounter.value = null;
+        } else {
+            message.info("对方似乎对你不感兴趣...");
+            currentEncounter.value = null;
+        }
+        if (data.remaining_energy !== undefined) {
+            props.profile.energy = data.remaining_energy;
+        }
+    } catch (e) {
+        message.error("网络错误");
+    } finally {
+        loading.value = false;
+    }
+};
 
 const activeTab = ref('chat');
 
@@ -74,6 +137,45 @@ const moments = ref([
           
           <n-tab-pane name="contacts" tab="通讯录">
             <n-empty description="暂无联系人" />
+          </n-tab-pane>
+
+          <n-tab-pane name="social" tab="探探">
+            <div class="social-app">
+                <div v-if="!currentEncounter" class="empty-state">
+                    <div class="logo">🔥</div>
+                    <p>寻找你的心动对象</p>
+                    <p class="cost">消耗 15 精力</p>
+                    <n-button type="primary" size="large" @click="handleSwipe" :loading="loading">
+                        开始匹配
+                    </n-button>
+                </div>
+                <div v-else class="encounter-card">
+                    <n-card :title="currentEncounter.name">
+                        <n-space vertical>
+                            <div class="info-row">
+                                <n-tag type="info">{{ currentEncounter.age }}岁</n-tag>
+                                <n-tag type="success">{{ currentEncounter.occupation }}</n-tag>
+                            </div>
+                            <div class="stats-row">
+                                <span>颜值: {{ currentEncounter.appearance }}</span>
+                                <span>财富: {{ currentEncounter.wealth }}</span>
+                            </div>
+                            <div class="tags" v-if="currentEncounter.tags">
+                                 <n-tag v-for="tag in currentEncounter.tags" :key="tag" size="small" round>
+                                     {{ tag }}
+                                 </n-tag>
+                            </div>
+                            <div class="actions">
+                                <n-space>
+                                    <n-button type="error" ghost @click="currentEncounter = null">Pass</n-button>
+                                    <n-button type="primary" @click="handleIceBreak('HUMOR')">幽默</n-button>
+                                    <n-button type="primary" @click="handleIceBreak('SINCERE')">真诚</n-button>
+                                </n-space>
+                            </div>
+                        </n-space>
+                    </n-card>
+                </div>
+            </div>
           </n-tab-pane>
         </n-tabs>
       </div>
@@ -199,5 +301,51 @@ const moments = ref([
 .actions {
   display: flex;
   gap: 12px;
+}
+
+.social-app {
+  padding: 20px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.logo {
+  font-size: 48px;
+}
+
+.cost {
+  color: #999;
+  font-size: 12px;
+}
+
+.encounter-card {
+  height: 100%;
+}
+
+.info-row {
+  display: flex;
+  gap: 8px;
+}
+
+.stats-row {
+  display: flex;
+  justify-content: space-around;
+  font-size: 12px;
+  color: #666;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
 }
 </style>

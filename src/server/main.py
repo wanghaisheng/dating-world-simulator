@@ -158,6 +158,7 @@ from src.server.serialization import (
     serialize_events_for_client,
     serialize_phenomenon,
 )
+from src.classes.modern.social_system import SocialAppManager
 
 # 全局游戏实例
 game_instance = dict(DEFAULT_GAME_STATE)

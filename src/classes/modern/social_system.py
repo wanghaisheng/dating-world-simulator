@@ -14,6 +14,222 @@ class ChatMessage:
     timestamp: int
     is_read: bool = False
 
+from enum import Enum
+import uuid
+
+class EncounterType(Enum):
+    NORMAL = "normal"       # 普通路人
+    ELITE = "elite"         # 精英/男神女神
+    TRAP = "trap"           # 陷阱
+
+class TrapType(Enum):
+    NONE = "none"
+    CATFISH = "catfish"     # 照骗
+    SCAMMER = "scammer"     # 杀猪盘
+    MOOCHER = "moocher"     # 酒托/饭托
+
+@dataclass
+class SocialEncounter:
+    id: str
+    type: EncounterType
+    name: str
+    age: int
+    occupation: str
+    tags: List[str]
+    
+    # Displayed stats (what the player sees)
+    display_appearance: int
+    display_wealth: int
+    
+    # Real stats (hidden)
+    real_appearance: int
+    real_wealth: int
+    trap_type: TrapType = TrapType.NONE
+    
+    # Interaction state
+    is_matched: bool = False
+    
+class SocialAppManager:
+    """
+    Manages the 'Dungeon' of modern romance: Social Apps (Tinder/Soul etc).
+    """
+    def __init__(self, world: "World"):
+        self.world = world
+        self.current_encounters: Dict[str, SocialEncounter] = {} # temporary storage for current session swipes
+
+    def swipe(self, player: "Avatar") -> Optional[SocialEncounter]:
+        """
+        Consume energy to find a new match.
+        Returns an Encounter object.
+        """
+        # 1. Check Energy
+        player.ensure_modern_profile()
+        if player.modern_profile.energy < 15:
+            return None # Not enough energy
+            
+        player.update_modern_status(energy_delta=-15)
+        
+        # 2. Determine Encounter Type based on probabilities
+        # Base: Normal 60%, Elite 10%, Trap 30%
+        
+        roll = random.random()
+        encounter_type = EncounterType.NORMAL
+        trap_type = TrapType.NONE
+        
+        trap_chance = 0.3
+        elite_chance = 0.1
+        
+        # Modifiers
+        # Rich players attract more scammers and elites
+        if player.modern_profile.assets > 100000:
+            trap_chance += 0.2
+        if player.modern_profile.assets > 1000000:
+            trap_chance += 0.1
+            elite_chance += 0.1
+            
+        # High status players attract more elites but also traps
+        if player.modern_profile.social_status > 80:
+            elite_chance += 0.1
+            trap_chance += 0.1
+            
+        # Normalize if chances exceed 1.0 (unlikely but safe)
+        total_special = trap_chance + elite_chance
+        if total_special > 0.9:
+            scale = 0.9 / total_special
+            trap_chance *= scale
+            elite_chance *= scale
+            
+        if roll < elite_chance:
+            encounter_type = EncounterType.ELITE
+        elif roll < elite_chance + trap_chance:
+            encounter_type = EncounterType.TRAP
+            # Determine trap type
+            trap_roll = random.random()
+            if trap_roll < 0.4:
+                trap_type = TrapType.CATFISH
+            elif trap_roll < 0.8:
+                trap_type = TrapType.SCAMMER
+            else:
+                trap_type = TrapType.MOOCHER
+        
+        # 3. Generate Profile Data
+        encounter = self._generate_encounter(encounter_type, trap_type)
+        self.current_encounters[encounter.id] = encounter
+        
+        return encounter
+
+    def _generate_encounter(self, etype: EncounterType, ttype: TrapType) -> SocialEncounter:
+        """Generate random encounter data."""
+        # Simple random generation for now
+        # Ideally this should come from a name/job database
+        
+        fake_id = str(uuid.uuid4())
+        
+        # Defaults for Normal
+        display_app = random.randint(50, 80)
+        display_wealth = random.randint(30, 70)
+        real_app = display_app
+        real_wealth = display_wealth
+        name = "Passerby " + fake_id[:4]
+        occupation = "Employee"
+        tags = ["Travel", "Foodie"]
+        
+        if etype == EncounterType.ELITE:
+            display_app = random.randint(85, 99)
+            display_wealth = random.randint(80, 99)
+            real_app = display_app
+            real_wealth = display_wealth
+            name = "Elite " + fake_id[:4]
+            occupation = "Executive"
+            tags = ["Golf", "Investment", "Art"]
+            
+        elif etype == EncounterType.TRAP:
+            name = "Stranger " + fake_id[:4]
+            if ttype == TrapType.CATFISH:
+                display_app = random.randint(90, 99) # Looks hot
+                real_app = random.randint(30, 50)    # Actually not
+                tags = ["Model", "Fitness"]
+            elif ttype == TrapType.SCAMMER:
+                display_wealth = random.randint(90, 99) # Looks rich
+                real_wealth = 0
+                occupation = "Crypto Investor"
+                tags = ["Finance", "Crypto"]
+            elif ttype == TrapType.MOOCHER:
+                display_app = random.randint(80, 90)
+                display_wealth = random.randint(40, 60)
+                tags = ["Party", "Wine"]
+                
+        return SocialEncounter(
+            id=fake_id,
+            type=etype,
+            name=name,
+            age=random.randint(20, 35),
+            occupation=occupation,
+            tags=tags,
+            display_appearance=display_app,
+            display_wealth=display_wealth,
+            real_appearance=real_app,
+            real_wealth=real_wealth,
+            trap_type=ttype
+        )
+
+    def ice_break(self, player: "Avatar", encounter_id: str, choice_type: str) -> bool:
+        """
+        Attempt to break the ice.
+        choice_type: 'HUMOR', 'SINCERE', 'PICKUP_LINE'
+        Returns True if success (added to contacts), False otherwise.
+        """
+        if encounter_id not in self.current_encounters:
+            return False
+            
+        encounter = self.current_encounters[encounter_id]
+        
+        # Simple logic: 
+        # Elite is hard to get.
+        # Trap is easy to get (they want to trap you).
+        # Normal depends on match.
+        
+        success_chance = 0.5
+        
+        if encounter.type == EncounterType.TRAP:
+            success_chance = 0.9 # Traps are eager
+        elif encounter.type == EncounterType.ELITE:
+            success_chance = 0.2 # Elites are picky
+            # Modifiers based on player stats could go here
+            if player.modern_profile.assets > 80: # Rich player
+                success_chance += 0.3
+            if player.modern_profile.social_status > 80:
+                success_chance += 0.3
+                
+        # Choice modifiers (mock)
+        if choice_type == "HUMOR":
+            success_chance += 0.1
+        elif choice_type == "PICKUP_LINE":
+            success_chance -= 0.1 # Risky
+            
+        is_success = random.random() < success_chance
+        
+        if is_success:
+            # Create a lightweight contact entry
+            # In a full implementation, this would be a real Avatar
+            player.ensure_modern_profile()
+            
+            contact_data = {
+                "affection": 15, # Starts as Acquaintance
+                "name": encounter.name,
+                "occupation": encounter.occupation,
+                "age": encounter.age,
+                "tags": encounter.tags,
+                "is_npc": False, # Lightweight contact
+                "encounter_id": encounter.id,
+                "type": encounter.type.value,
+                "trap_type": encounter.trap_type.value
+            }
+            
+            player.modern_profile.relationships[encounter.id] = contact_data
+            
+        return is_success
+
 class ChatManager:
     """
     Manages chat interactions between avatars.

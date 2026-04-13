@@ -125,6 +125,10 @@ class ModernProfileMixin:
 2.  [x] 开发 `DateManager`：
     *   [x] 实现地点互动逻辑（花钱/花精力 -> 获得好感/属性）。
     *   [x] 实现邀约机制（成功率受好感度和心情影响）。
+3.  [x] 开发 `SocialAppManager` (社交软件探险)：
+    *   [x] 实现 `Swipe` (滑卡) 逻辑：基于概率生成随机 Encounter。
+    *   [x] 实现遭遇类型生成：普通路人 / 精英男神女神 / 陷阱怪 (照骗, 杀猪盘)。
+    *   [x] 实现破冰机制：首轮对话判定是否获得联系方式。
 
 ### 阶段四：风险与修罗场系统 (Risk & Conflict)
 1.  [x] 实现 `RelationshipRiskEngine` 基础框架。
@@ -147,6 +151,9 @@ class ModernProfileMixin:
 ### 阶段五：UI 与体验适配 (Web/Frontend)
 1.  [x] 前端增加“手机”界面：用于显示聊天记录、朋友圈。
 2.  [x] 调整主界面布局：显示精力条、金钱、日程表。
+3.  [x] 增加“社交软件”App 界面：
+    *   [x] 实现卡片滑动交互 (Swipe Left/Right)。
+    *   [x] 显示匹配对象的资料卡 (Avatar, Tags, Distance)。
 
 ---
 

@@ -227,6 +227,25 @@ docker-compose up -d --build
 - [cultivation-world-simulator-api-skill](https://github.com/RealityError/cultivation-world-simulator-api-skill)
 - [cultivation-world-simulator-android](https://github.com/RealityError/cultivation-world-simulator-android)
 
+# 扩展模式
+
+## 现代都市恋爱模拟 (Modern Urban Romance)
+
+基于修仙世界模拟器架构的现代都市恋爱模拟扩展，将"修仙证道"转化为"职场生存 × 情感博弈"体验。
+
+- **分支**: `feat/modern-romance`
+- **文档**: [extensions/README_MODERN.md](extensions/README_MODERN.md)
+- **设计文档**: [extensions/modern_romance_design.md](extensions/modern_romance_design.md)
+- **实施计划**: [extensions/implementation_plan_modern_romance.md](extensions/implementation_plan_modern_romance.md)
+
+**核心特性**:
+- 📱 拟真手机界面（微信聊天、朋友圈、探探滑动）
+- ⚠️ 高风险情感引擎（多线修罗场、PUA、捞女、NPD等隐藏原型）
+- 🕒 真实日程系统（NPC有独立的生活规律）
+- 💔 永久debuff（被PUA导致自信心下降、被杀猪导致资产清零）
+
+**启用方式**: 在 `static/config.yml` 中设置 `game.mode: "modern_romance"`
+
 ## 👥 贡献者
 
 <a href="https://github.com/4thfever/cultivation-world-simulator/graphs/contributors">

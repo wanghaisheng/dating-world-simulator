@@ -221,6 +221,8 @@ class ModernProfileMixin:
 
 由于 rebase 时跳过了部分提交，以下功能需要重新实现或适配新架构：
 
-1. **README.md 更新**: 原 EN_README.md 重命名为 README-original-EN.md，需更新文档
-2. **modern_avatar.py**: 原位于 `src/classes/avatar/`，需移动到 `src/classes/core/avatar/` 并适配新架构
-3. **Server API 集成**: SocialAppManager 等功能需要通过 command_handlers 模式集成到 server 端
+1. **README.md 更新**: ✅ 已完成 - 在主 README.md 中添加了现代恋爱模式扩展说明
+2. **modern_avatar.py**: ✅ 已完成 - 功能已合并到 `src/classes/core/avatar/modern_mixin.py`，无需单独文件
+3. **Server API 集成**: ⏳ 待完成 - SocialAppManager 等功能需要通过 command_handlers 模式集成到 server 端
+   - 当前状态：SocialAppManager 已导入到 main.py，但未通过 command_handlers 模式暴露 API
+   - 需要添加：社交软件滑动、聊天发送、约会邀约等 API 端点

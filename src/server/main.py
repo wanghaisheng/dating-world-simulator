@@ -171,6 +171,21 @@ AVATAR_ASSETS = {
 }
 # 触发配置重载的标记 (technique.csv updated)
 
+# Modern Romance Mode Manager
+_social_app_manager: SocialAppManager | None = None
+
+def get_social_app_manager() -> SocialAppManager | None:
+    """获取或创建 SocialAppManager 实例（仅在现代模式下有效）"""
+    global _social_app_manager
+    if _social_app_manager is None:
+        world = game_instance.get("world")
+        if world:
+            from src.utils.config import CONFIG
+            if hasattr(CONFIG, 'game') and hasattr(CONFIG.game, 'mode'):
+                if CONFIG.game.mode == "modern_romance":
+                    _social_app_manager = SocialAppManager(world)
+    return _social_app_manager
+
 # 简易的命令行参数检查 (不使用 argparse 以避免冲突和时序问题)
 IS_DEV_MODE = "--dev" in sys.argv
 
@@ -444,6 +459,7 @@ command_handlers = create_command_handlers(
     get_load_game_into_runtime=lambda: load_game_into_runtime,
     get_load_game=lambda: load_game,
     get_events_db_path=get_events_db_path,
+    get_social_app_manager=get_social_app_manager,
 )
 
 run_start_game = command_handlers.run_start_game
@@ -464,6 +480,13 @@ run_clear_long_term_objective = command_handlers.run_clear_long_term_objective
 run_save_game = command_handlers.run_save_game
 run_delete_save = command_handlers.run_delete_save
 run_load_game = command_handlers.run_load_game
+
+# Modern Romance Mode Commands
+run_modern_swipe = command_handlers.run_modern_swipe
+run_modern_ice_break = command_handlers.run_modern_ice_break
+run_modern_send_chat = command_handlers.run_modern_send_chat
+run_modern_propose_date = command_handlers.run_modern_propose_date
+run_modern_start_date = command_handlers.run_modern_start_date
 
 
 def get_settings() -> dict:

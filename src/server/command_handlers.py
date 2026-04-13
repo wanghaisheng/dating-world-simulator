@@ -52,6 +52,8 @@ def create_command_handlers(
     get_load_game_into_runtime,
     get_load_game,
     get_events_db_path,
+    # Modern Romance Mode parameters
+    get_social_app_manager=lambda: None,
 ):
     async def run_start_game(req) -> dict:
         run_config = RunConfig(**model_to_dict(req))
@@ -205,6 +207,130 @@ def create_command_handlers(
             _model_to_dict=model_to_dict,
         )
 
+    # Modern Romance Mode Commands
+    async def run_modern_swipe(*, avatar_id: str) -> dict:
+        """Swipe on social app to find a match."""
+        social_app_manager = get_social_app_manager()
+        if not social_app_manager:
+            return {"status": "error", "message": "Modern romance mode not enabled"}
+        
+        world = runtime.game_instance.get("world")
+        if not world:
+            return {"status": "error", "message": "World not initialized"}
+            
+        avatar = world.avatar_manager.get_avatar(avatar_id)
+        if not avatar:
+            return {"status": "error", "message": "Avatar not found"}
+            
+        encounter = social_app_manager.swipe(avatar)
+        if not encounter:
+            return {"status": "error", "message": "Not enough energy or no match found"}
+            
+        return {
+            "status": "success",
+            "encounter": {
+                "id": encounter.id,
+                "name": encounter.name,
+                "age": encounter.age,
+                "occupation": encounter.occupation,
+                "tags": encounter.tags,
+                "display_appearance": encounter.display_appearance,
+                "display_wealth": encounter.display_wealth,
+                "type": encounter.type.value
+            }
+        }
+
+    async def run_modern_ice_break(*, avatar_id: str, encounter_id: str, choice_type: str) -> dict:
+        """Attempt to break the ice with an encounter."""
+        social_app_manager = get_social_app_manager()
+        if not social_app_manager:
+            return {"status": "error", "message": "Modern romance mode not enabled"}
+        
+        world = runtime.game_instance.get("world")
+        if not world:
+            return {"status": "error", "message": "World not initialized"}
+            
+        avatar = world.avatar_manager.get_avatar(avatar_id)
+        if not avatar:
+            return {"status": "error", "message": "Avatar not found"}
+            
+        success = social_app_manager.ice_break(avatar, encounter_id, choice_type)
+        return {"status": "success", "success": success}
+
+    async def run_modern_send_chat(*, sender_id: str, receiver_id: str, content: str) -> dict:
+        """Send a chat message."""
+        social_app_manager = get_social_app_manager()
+        if not social_app_manager:
+            return {"status": "error", "message": "Modern romance mode not enabled"}
+        
+        world = runtime.game_instance.get("world")
+        if not world:
+            return {"status": "error", "message": "World not initialized"}
+            
+        sender = world.avatar_manager.get_avatar(sender_id)
+        receiver = world.avatar_manager.get_avatar(receiver_id)
+        if not sender or not receiver:
+            return {"status": "error", "message": "Avatar not found"}
+            
+        chat_manager = social_app_manager if hasattr(social_app_manager, 'chat_manager') else None
+        if not chat_manager:
+            # Create a temporary chat manager
+            from src.classes.modern.social_system import ChatManager
+            chat_manager = ChatManager(world)
+            
+        msg = chat_manager.send_message(sender, receiver, content)
+        return {
+            "status": "success",
+            "message": {
+                "sender_id": msg.sender_id,
+                "receiver_id": msg.receiver_id,
+                "content": msg.content,
+                "timestamp": msg.timestamp
+            }
+        }
+
+    async def run_modern_propose_date(*, initiator_id: str, target_id: str, location: str) -> dict:
+        """Propose a date."""
+        social_app_manager = get_social_app_manager()
+        if not social_app_manager:
+            return {"status": "error", "message": "Modern romance mode not enabled"}
+        
+        world = runtime.game_instance.get("world")
+        if not world:
+            return {"status": "error", "message": "World not initialized"}
+            
+        initiator = world.avatar_manager.get_avatar(initiator_id)
+        target = world.avatar_manager.get_avatar(target_id)
+        if not initiator or not target:
+            return {"status": "error", "message": "Avatar not found"}
+            
+        from src.classes.modern.social_system import DateManager
+        date_manager = DateManager(world)
+        
+        success = date_manager.propose_date(initiator, target, location)
+        return {"status": "success", "success": success}
+
+    async def run_modern_start_date(*, initiator_id: str, target_id: str, location: str) -> dict:
+        """Start a date event."""
+        social_app_manager = get_social_app_manager()
+        if not social_app_manager:
+            return {"status": "error", "message": "Modern romance mode not enabled"}
+        
+        world = runtime.game_instance.get("world")
+        if not world:
+            return {"status": "error", "message": "World not initialized"}
+            
+        initiator = world.avatar_manager.get_avatar(initiator_id)
+        target = world.avatar_manager.get_avatar(target_id)
+        if not initiator or not target:
+            return {"status": "error", "message": "Avatar not found"}
+            
+        from src.classes.modern.social_system import DateManager
+        date_manager = DateManager(world)
+        
+        result = date_manager.start_date(initiator, target, location)
+        return {"status": "success", "result": result}
+
     return SimpleNamespace(
         run_start_game=run_start_game,
         run_reinit_game=run_reinit_game,
@@ -224,4 +350,10 @@ def create_command_handlers(
         run_save_game=run_save_game,
         run_delete_save=run_delete_save,
         run_load_game=run_load_game,
+        # Modern Romance Mode Commands
+        run_modern_swipe=run_modern_swipe,
+        run_modern_ice_break=run_modern_ice_break,
+        run_modern_send_chat=run_modern_send_chat,
+        run_modern_propose_date=run_modern_propose_date,
+        run_modern_start_date=run_modern_start_date,
     )

@@ -593,6 +593,12 @@ configure_routes_and_mounts(
     run_save_game=run_save_game,
     run_delete_save=run_delete_save,
     run_load_game=run_load_game,
+    # Modern Romance Mode Commands
+    run_modern_swipe=run_modern_swipe,
+    run_modern_ice_break=run_modern_ice_break,
+    run_modern_send_chat=run_modern_send_chat,
+    run_modern_propose_date=run_modern_propose_date,
+    run_modern_start_date=run_modern_start_date,
     assets_path=ASSETS_PATH,
     web_dist_path=WEB_DIST_PATH,
     is_dev_mode=IS_DEV_MODE,

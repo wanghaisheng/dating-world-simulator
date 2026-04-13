@@ -140,6 +140,12 @@ def configure_routes_and_mounts(
     run_save_game,
     run_delete_save,
     run_load_game,
+    # Modern Romance Mode Commands
+    run_modern_swipe=lambda: None,
+    run_modern_ice_break=lambda: None,
+    run_modern_send_chat=lambda: None,
+    run_modern_propose_date=lambda: None,
+    run_modern_start_date=lambda: None,
     assets_path: str,
     web_dist_path: str,
     is_dev_mode: bool,
@@ -207,6 +213,12 @@ def configure_routes_and_mounts(
             run_save_game=run_save_game,
             run_delete_save=run_delete_save,
             run_load_game=run_load_game,
+            # Modern Romance Mode Commands
+            run_modern_swipe=run_modern_swipe,
+            run_modern_ice_break=run_modern_ice_break,
+            run_modern_send_chat=run_modern_send_chat,
+            run_modern_propose_date=run_modern_propose_date,
+            run_modern_start_date=run_modern_start_date,
         )
     )
 

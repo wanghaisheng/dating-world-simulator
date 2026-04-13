@@ -82,6 +82,35 @@ class LoadGameRequest(BaseModel):
     filename: str
 
 
+# Modern Romance Mode Requests
+class ModernSwipeRequest(BaseModel):
+    avatar_id: str
+
+
+class ModernIceBreakRequest(BaseModel):
+    avatar_id: str
+    encounter_id: str
+    choice_type: str  # "HUMOR", "SINCERE", "PICKUP_LINE"
+
+
+class ModernSendChatRequest(BaseModel):
+    sender_id: str
+    receiver_id: str
+    content: str
+
+
+class ModernProposeDateRequest(BaseModel):
+    initiator_id: str
+    target_id: str
+    location: str
+
+
+class ModernStartDateRequest(BaseModel):
+    initiator_id: str
+    target_id: str
+    location: str
+
+
 def create_public_command_router(
     *,
     run_start_game: Callable[[BaseModel], object],
@@ -103,6 +132,12 @@ def create_public_command_router(
     run_save_game: Callable[..., dict],
     run_delete_save: Callable[..., dict],
     run_load_game: Callable[..., object],
+    # Modern Romance Mode Commands
+    run_modern_swipe: Callable[..., object] = lambda: {"status": "error", "message": "Not implemented"},
+    run_modern_ice_break: Callable[..., object] = lambda: {"status": "error", "message": "Not implemented"},
+    run_modern_send_chat: Callable[..., object] = lambda: {"status": "error", "message": "Not implemented"},
+    run_modern_propose_date: Callable[..., object] = lambda: {"status": "error", "message": "Not implemented"},
+    run_modern_start_date: Callable[..., object] = lambda: {"status": "error", "message": "Not implemented"},
 ) -> APIRouter:
     router = APIRouter()
 
@@ -191,5 +226,50 @@ def create_public_command_router(
     @router.post("/api/v1/command/game/load")
     async def api_load_game_v1(req: LoadGameRequest):
         return ok_response(await run_load_game(filename=req.filename))
+
+    # Modern Romance Mode Endpoints
+    @router.post("/api/v1/command/modern/swipe")
+    async def modern_swipe_v1(req: ModernSwipeRequest):
+        return ok_response(await run_modern_swipe(avatar_id=req.avatar_id))
+
+    @router.post("/api/v1/command/modern/ice-break")
+    async def modern_ice_break_v1(req: ModernIceBreakRequest):
+        return ok_response(
+            await run_modern_ice_break(
+                avatar_id=req.avatar_id,
+                encounter_id=req.encounter_id,
+                choice_type=req.choice_type
+            )
+        )
+
+    @router.post("/api/v1/command/modern/send-chat")
+    async def modern_send_chat_v1(req: ModernSendChatRequest):
+        return ok_response(
+            await run_modern_send_chat(
+                sender_id=req.sender_id,
+                receiver_id=req.receiver_id,
+                content=req.content
+            )
+        )
+
+    @router.post("/api/v1/command/modern/propose-date")
+    async def modern_propose_date_v1(req: ModernProposeDateRequest):
+        return ok_response(
+            await run_modern_propose_date(
+                initiator_id=req.initiator_id,
+                target_id=req.target_id,
+                location=req.location
+            )
+        )
+
+    @router.post("/api/v1/command/modern/start-date")
+    async def modern_start_date_v1(req: ModernStartDateRequest):
+        return ok_response(
+            await run_modern_start_date(
+                initiator_id=req.initiator_id,
+                target_id=req.target_id,
+                location=req.location
+            )
+        )
 
     return router

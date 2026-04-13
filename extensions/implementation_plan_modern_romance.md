@@ -171,6 +171,12 @@ class ModernProfileMixin:
 3.  [x] 增加"社交软件" App 界面：
     *   [x] 实现卡片滑动交互 (Swipe Left/Right)。
     *   [x] 显示匹配对象的资料卡 (Avatar, Tags, Distance)。
+4.  [x] **API 端点集成**: 添加现代模式 API 路由
+    *   [x] POST /api/v1/command/modern/swipe - 社交软件滑动
+    *   [x] POST /api/v1/command/modern/ice-break - 破冰互动
+    *   [x] POST /api/v1/command/modern/send-chat - 发送聊天
+    *   [x] POST /api/v1/command/modern/propose-date - 提议约会
+    *   [x] POST /api/v1/command/modern/start-date - 开始约会
 
 ---
 

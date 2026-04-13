@@ -19,7 +19,7 @@
 
 ### 3.1 全局模式控制
 
-在 `src/config.py` 中扩展 `GameMode` 枚举：
+在 `src/utils/config.py` 中扩展 `GameMode` 枚举（已存在，需确认）：
 
 ```python
 class GameMode(Enum):
@@ -27,6 +27,10 @@ class GameMode(Enum):
     THOUSAND_ILLUSIONS = "thousand_illusions" # 千幻无情道
     MODERN_ROMANCE = "modern_romance"    # 现代都市恋爱
 ```
+
+**配置路径适配**:
+- 新架构使用 `src/config/data_paths.py` 注入用户数据目录
+- 现代模式配置路径通过 `load_config()` 中的模式检测动态调整到 `static/game_configs/modern/`
 
 ### 3.2 资源配置 (static/game_configs)
 
@@ -43,9 +47,11 @@ class GameMode(Enum):
 *   **`persona.csv`**:
     *   定义现代性格标签：傲娇, 腹黑, 治愈系, 社恐, E人, 捞女, 海王。
 
-### 3.3 角色数据模型扩展 (src/classes/avatar)
+### 3.3 角色数据模型扩展 (src/classes/core/avatar)
 
-创建 `src/classes/avatar/modern_mixin.py`，实现 `ModernProfileMixin`：
+**架构更新**: Avatar mixin 已移动到 `src/classes/core/avatar/`
+
+创建 `src/classes/core/avatar/modern_mixin.py`，实现 `ModernProfileMixin`：
 
 ```python
 @dataclass
@@ -76,18 +82,22 @@ class ModernProfileMixin:
         pass
 ```
 
-### 3.4 模拟循环与时间系统 (src/sim)
+### 3.4 模拟循环与时间系统 (src/sim/simulator_engine)
+
+**架构更新**: Simulator 已重构为 `src/sim/simulator_engine/simulator.py`，使用相位分离架构
 
 *   **时间粒度调整**:
-    *   修仙模式：`run_month()` (每月一次循环)。
-    *   恋爱模式：`run_day()` (每日循环)，细分为 `DayPhase` (Morning/Afternoon/Evening/LateNight)。
+    *   修仙模式：`step()` (每月一次循环)。
+    *   恋爱模式：`step_modern()` (每日/小时循环)，通过配置 `ticks_per_year` 动态调整时间粒度。
 *   **日程系统 (Schedule System)**:
     *   每个 NPC 生成每日日程表（例如：9:00-18:00 工作，19:00-21:00 健身）。
-    *   玩家选择地点移动，如果地点与 NPC 日程重合，触发“偶遇”事件。
+    *   玩家选择地点移动，如果地点与 NPC 日程重合，触发"“偶遇”事件。
 
 ### 3.5 互动系统 (Interaction System)
 
-新增 `src/systems/social_system.py`:
+**架构更新**: 现代社交系统已实现为 `src/classes/modern/social_system.py`
+
+新增 `src/classes/modern/social_system.py`:
 
 *   **Chat Engine (聊天引擎)**:
     *   生成微信/短信风格的对话。
@@ -112,15 +122,17 @@ class ModernProfileMixin:
 ### 阶段一：环境与数据准备
 1.  [x] 创建分支 `feat/modern-romance`。
 2.  [x] 建立 `static/game_configs/modern/` 目录，创建基础的城市、组织、物品 CSV 模板。
-3.  [x] 在 `src/config.py` 中注册 `MODERN_ROMANCE` 模式。
+3.  [x] 在 `src/utils/config.py` 中注册 `MODERN_ROMANCE` 模式（通过动态路径调整）。
+4.  [x] 适配新架构：配置路径使用 `data_paths` 注入。
 
 ### 阶段二：角色与日程系统
 1.  [x] 实现 `ModernProfileMixin` 并集成到 `Avatar` 类 (包含 Hidden Traits)。
+    *   [x] **架构适配**: 移动到 `src/classes/core/avatar/modern_mixin.py`
 2.  [x] 实现 `ScheduleGenerator`：基于职业和性格生成 NPC 的周日程表。
 3.  [x] 改造 `Simulator`：在现代模式下切换为“日循环”逻辑，消耗 `energy` 执行行动。
 
 ### 阶段三：通讯与约会功能
-1.  [x] 开发 `ChatManager` (src/classes/modern/social_system.py)：集成 LLM，支持生成“发送消息”和“回复消息”的内容。
+1.  [x] 开发 `ChatManager` (src/classes/modern/social_system.py)：集成 LLM，支持生成"发送消息"和"回复消息"的内容。
     *   [x] 编写 `templates/modern_chat.txt` Prompt 模板。
 2.  [x] 开发 `DateManager`：
     *   [x] 实现地点互动逻辑（花钱/花精力 -> 获得好感/属性）。
@@ -132,6 +144,7 @@ class ModernProfileMixin:
 
 ### 阶段四：风险与修罗场系统 (Risk & Conflict)
 1.  [x] 实现 `RelationshipRiskEngine` 基础框架。
+    *   [x] **架构适配**: 移动到 `src/classes/modern/risk_engine.py`
 2.  [x] 实现多线冲突检测 (`_check_harem_conflict`)：安全区 vs 危险区逻辑。
 3.  [x] 完善负面原型逻辑 (Archetype Logic)：
     *   [x] **通用**: 实现 `Sincerity` (真实度) 对互动成功率的影响。
@@ -149,9 +162,13 @@ class ModernProfileMixin:
 5.  [x] 编写突发事件库 (`static/game_configs/modern/events.json`)。
 
 ### 阶段五：UI 与体验适配 (Web/Frontend)
-1.  [x] 前端增加“手机”界面：用于显示聊天记录、朋友圈。
+**架构适配**: 前端已重构为使用 composables 架构
+
+1.  [x] 前端增加"手机"界面：用于显示聊天记录、朋友圈。
+    *   [x] **架构适配**: PhonePanel 组件已集成到 `web/src/components/game/panels/modern/PhonePanel.vue`
 2.  [x] 调整主界面布局：显示精力条、金钱、日程表。
-3.  [x] 增加“社交软件”App 界面：
+    *   [x] **架构适配**: ModernStats 组件已集成到 StatusBar
+3.  [x] 增加"社交软件" App 界面：
     *   [x] 实现卡片滑动交互 (Swipe Left/Right)。
     *   [x] 显示匹配对象的资料卡 (Avatar, Tags, Distance)。
 
@@ -170,3 +187,40 @@ class ModernProfileMixin:
 ### 5.3 经济系统平衡
 *   **问题**: 玩家可能通过“刷钱”导致恋爱难度降低。
 *   **方案**: 引入“通货膨胀”机制（随着好感度提升，NPC 对礼物的要求变高）和“时间互斥”（赚钱必须消耗大量时间，导致没时间陪伴，好感自然下降）。
+
+## 6. 架构适配说明 (2026 更新)
+
+**新 main 分支架构适配**：
+
+### 6.1 Simulator 重构
+- **旧架构**: `src/sim/simulator.py` 单文件实现
+- **新架构**: `src/sim/simulator_engine/simulator.py` 使用相位分离架构
+- **适配**: 现代模式通过 `step_modern()` 方法实现小时级时间步进，与修仙模式的月级步进共存
+
+### 6.2 Avatar 类重构
+- **旧架构**: Avatar mixin 在 `src/classes/avatar/`
+- **新架构**: Avatar mixin 移动到 `src/classes/core/avatar/`
+- **适配**: `ModernProfileMixin` 已移动到 `src/classes/core/avatar/modern_mixin.py`
+
+### 6.3 Server 端重构
+- **旧架构**: `src/server/main.py` 直接定义 API 端点
+- **新架构**: 使用 `src/server/command_handlers.py` 创建命令处理器
+- **适配**: 现代模式相关功能需要通过 command_handlers 模式集成，而非直接在 main.py 中添加路由
+
+### 6.4 配置系统重构
+- **旧架构**: 配置路径硬编码在 `static/`
+- **新架构**: 使用 `src/config/data_paths.py` 注入用户数据目录
+- **适配**: 现代模式配置路径通过 `load_config()` 中的模式检测动态调整
+
+### 6.5 前端架构重构
+- **旧架构**: 直接在组件中管理状态
+- **新架构**: 使用 composables (`useAppShell`, `useSystemMenuFlow`, `useSidebarResize`)
+- **适配**: PhonePanel 和 ModernStats 组件已集成到新架构中
+
+### 6.6 待完成项 (Rebase 后需补充)
+
+由于 rebase 时跳过了部分提交，以下功能需要重新实现或适配新架构：
+
+1. **README.md 更新**: 原 EN_README.md 重命名为 README-original-EN.md，需更新文档
+2. **modern_avatar.py**: 原位于 `src/classes/avatar/`，需移动到 `src/classes/core/avatar/` 并适配新架构
+3. **Server API 集成**: SocialAppManager 等功能需要通过 command_handlers 模式集成到 server 端

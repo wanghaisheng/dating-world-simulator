@@ -158,6 +158,9 @@ Prompt 重点调整：
 ### 6.1 数据结构 (Data Structures)
 
 #### 6.1.1 现代属性 (ModernProfileMixin)
+
+**位置**: `src/classes/core/avatar/modern_mixin.py`
+
 ```python
 @dataclass
 class ModernProfileMixin:
@@ -181,6 +184,7 @@ class ModernProfileMixin:
     # --- 恋爱状态 ---
     relationship_status: str # 单身/恋爱中/复杂
     relationships: Dict[str, dict] # 记录与每个人的具体状态
+    daily_schedule: Dict[int, str] # 日程表 (hour -> activity)
 ```
 
 #### 6.1.2 关系阶段 (Relationship Stages)
@@ -198,13 +202,20 @@ class RelationshipStage(Enum):
 
 ### 6.2 模拟循环 (Simulation Loop)
 
-*   **时间刻度 (Tick)**: 1 Tick = 1 小时。每天 24 Ticks。
+**架构说明**: Simulator 已重构为 `src/sim/simulator_engine/simulator.py`，使用相位分离架构。
+
+*   **时间刻度 (Tick)**:
+    *   修仙模式：1 Tick = 1 月
+    *   现代模式：1 Tick = 1 小时（通过配置 `ticks_per_year` 动态调整）
 *   **日程生成 (Schedule)**: 每日 0 点生成当日日程。
     *   `Work`: 9:00 - 18:00 (根据职业变动)
     *   `Rest`: 23:00 - 7:00
     *   `Free Time`: 其他时间，用于社交/娱乐。
+*   **现代模式专用方法**: `step_modern()` - 处理小时级时间步进和日程执行
 
 ### 6.3 风险引擎 (Risk Engine)
+
+**位置**: `src/classes/modern/risk_engine.py`
 
 `RelationshipRiskEngine` 是核心逻辑组件，负责处理“负面反馈”和“多线惩罚”。
 
@@ -241,4 +252,34 @@ class RelationshipStage(Enum):
 ---
 
 ## 7. 总结
+
 本设计通过将修仙元素替换为现代都市元素，构建了一个极具张力的恋爱模拟器。AI 的核心价值在于生成**不可预测的恋爱展开**和**真实的情感反馈**，让玩家在虚拟世界中体验极致的甜蜜与修罗场的刺激。
+
+## 8. 架构适配说明 (2026 更新)
+
+**新 main 分支架构适配**:
+
+### 8.1 Simulator 重构
+- **旧架构**: `src/sim/simulator.py` 单文件实现
+- **新架构**: `src/sim/simulator_engine/simulator.py` 使用相位分离架构
+- **适配**: 现代模式通过 `step_modern()` 方法实现小时级时间步进，与修仙模式的月级步进共存
+
+### 8.2 Avatar 类重构
+- **旧架构**: Avatar mixin 在 `src/classes/avatar/`
+- **新架构**: Avatar mixin 移动到 `src/classes/core/avatar/`
+- **适配**: `ModernProfileMixin` 已移动到 `src/classes/core/avatar/modern_mixin.py`
+
+### 8.3 Server 端重构
+- **旧架构**: `src/server/main.py` 直接定义 API 端点
+- **新架构**: 使用 `src/server/command_handlers.py` 创建命令处理器
+- **适配**: 现代模式相关功能需要通过 command_handlers 模式集成，而非直接在 main.py 中添加路由
+
+### 8.4 配置系统重构
+- **旧架构**: 配置路径硬编码在 `static/`
+- **新架构**: 使用 `src/config/data_paths.py` 注入用户数据目录
+- **适配**: 现代模式配置路径通过 `load_config()` 中的模式检测动态调整
+
+### 8.5 前端架构重构
+- **旧架构**: 直接在组件中管理状态
+- **新架构**: 使用 composables (`useAppShell`, `useSystemMenuFlow`, `useSidebarResize`)
+- **适配**: PhonePanel 和 ModernStats 组件已集成到新架构中

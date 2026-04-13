@@ -1,0 +1,49 @@
+{
+  "risk_events": {
+    "GOLD_DIGGER": [
+      {
+        "id": "gd_gift_demand_1",
+        "text": "{partner_name} 看上了一款价值 {cost} 的限量包包，暗示你买给TA。",
+        "consequences": {
+            "accept": {"assets": -1, "mood": 5, "stress": 0},
+            "reject": {"mood": -5, "stress": 5, "partner_mood": -10}
+        }
+      }
+    ],
+    "NPD": [
+      {
+        "id": "npd_gaslight_1",
+        "text": "{partner_name} 指责你最近不够关心TA，让你感到内疚。",
+        "consequences": {
+            "mood": -10,
+            "stress": 10
+        }
+      }
+    ],
+    "SCAMMER": [
+        {
+            "id": "scammer_invest_1",
+            "text": "{partner_name} 推荐了一个'稳赚不赔'的理财项目。",
+            "consequences": {
+                "assets_percent": -0.8,
+                "mood": -50,
+                "stress": 50
+            }
+        }
+    ]
+  },
+  "date_events": {
+    "park": [
+      "你们在公园散步，享受宁静的午后。",
+      "在这个季节，公园的花开得正艳。"
+    ],
+    "cafe": [
+        "咖啡店的音乐很舒缓，你们聊了很多。",
+        "你点了一杯拿铁，TA点了一杯卡布奇诺。"
+    ],
+    "movie": [
+      "你们看了一场感人的电影。",
+      "电影很无聊，但你们聊得很开心。"
+    ]
+  }
+}

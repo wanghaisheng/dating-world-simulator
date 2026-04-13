@@ -1,0 +1,6 @@
+item_id,name_id,desc_id,name,realm,type,desc,price,effects
+,名称ID,描述ID,名称,境界(练气/筑基/金丹/元婴),类型(Breakthrough/Lifespan/BurnBlood/Heal),描述,价格,JSON形式Effects
+3001,ITEM_3001_NAME,ITEM_3001_DESC,意式浓缩咖啡,QI_REFINEMENT,Heal,一杯提神醒脑的咖啡，恢复少量精力。,30,"{restore_energy: 10}"
+3002,ITEM_3002_NAME,ITEM_3002_DESC,精装书籍,QI_REFINEMENT,Heal,一本好书，能让人平静下来，恢复心情。,50,"{restore_mood: 10}"
+3003,ITEM_3003_NAME,ITEM_3003_DESC,高级健身卡,QI_REFINEMENT,Heal,去健身房挥洒汗水，强身健体。,500,"{health_gain: 5}"
+3004,ITEM_3004_NAME,ITEM_3004_DESC,名牌手表,FOUNDATION_ESTABLISHMENT,Heal,彰显身份的配饰，增加魅力。,5000,"{charm_gain: 10}"

@@ -1,0 +1,7 @@
+id,name_id,desc_id,name,desc,type,realm,sect,price,effects
+,名称ID,描述ID,名称,描述,类型(Attack/Defense/Passive/Heal/Auxiliary),境界(练气/筑基/金丹/元婴),宗门(可选),价格,JSON形式
+101,TECH_101_NAME,TECH_101_DESC,Python编程,掌握数据分析与自动化脚本编写。,Passive,QI_REFINEMENT,星耀科技,500,"{work_efficiency: 0.1}"
+102,TECH_102_NAME,TECH_102_DESC,金融分析,通过财务报表洞察商业价值。,Passive,QI_REFINEMENT,蓝海资本,600,"{money_gain: 0.1}"
+103,TECH_103_NAME,TECH_103_DESC,学术写作,撰写高质量的学术论文。,Passive,QI_REFINEMENT,国立大学,400,"{learning_speed: 0.1}"
+104,TECH_104_NAME,TECH_104_DESC,摄影艺术,捕捉光影瞬间，发现生活之美。,Passive,QI_REFINEMENT,潮流传媒,450,"{charm: 5}"
+201,TECH_201_NAME,TECH_201_DESC,深度学习架构,构建复杂的人工智能模型。,Passive,FOUNDATION_ESTABLISHMENT,星耀科技,2000,"{work_efficiency: 0.3}"

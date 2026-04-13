@@ -61,6 +61,12 @@ class AvatarSaveMixin:
                 "realm": self.spirit_animal.realm.name
             }
         
+        # 序列化modern_profile
+        modern_profile_dict = None
+        if getattr(self, "modern_profile", None) is not None:
+            from dataclasses import asdict
+            modern_profile_dict = asdict(self.modern_profile)
+
         return {
             # 基础信息
             "id": self.id,
@@ -112,6 +118,9 @@ class AvatarSaveMixin:
             # 行动与AI
             "current_action": current_action_dict,
             "planned_actions": planned_actions_list,
+            
+            # 扩展数据
+            "modern_profile": modern_profile_dict,
             "thinking": self.thinking,
             "short_term_objective": self.short_term_objective,
             "long_term_objective": {

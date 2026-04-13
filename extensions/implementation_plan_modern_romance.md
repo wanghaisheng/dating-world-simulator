@@ -41,30 +41,38 @@ class GameMode(Enum):
 *   **`elixir.csv` (Gift/Item)**:
     *   定义物品：奢侈品包, 限量球鞋, 电影票, 爱心便当。
 *   **`persona.csv`**:
-    *   定义现代性格标签：傲娇, 腹黑, 治愈系, 社恐, E人。
+    *   定义现代性格标签：傲娇, 腹黑, 治愈系, 社恐, E人, 捞女, 海王。
 
 ### 3.3 角色数据模型扩展 (src/classes/avatar)
 
 创建 `src/classes/avatar/modern_mixin.py`，实现 `ModernProfileMixin`：
 
 ```python
+@dataclass
 class ModernProfileMixin:
-    # 基础社会属性
-    occupation: str          # 职业 (程序员/医生/偶像...)
-    salary: int              # 月薪
-    assets: int              # 存款
+    # --- 基础属性 ---
+    occupation: str          # 职业
+    education: str           # 学历
+    mbti: str               # MBTI
+    hobbies: List[str]      # 兴趣
+    fashion_style: str      # 穿衣风格
     
-    # 恋爱核心属性
-    charm: int               # 魅力 (影响初次见面好感)
-    energy: int              # 精力值 (每日行动点数)
-    stress: int              # 压力值 (过高导致生病/崩溃)
+    # --- 动态状态 ---
+    energy: int = 100        # 精力 (每日行动点数)
+    stress: int = 0          # 压力
+    mood: int = 50           # 心情
+    assets: int = 0          # 资产 (现金流)
     
-    # 关系网 (Key: AvatarID, Value: RelationData)
-    # 包含: affection (好感), dependency (依赖), jealousy (嫉妒)
-    relationships: Dict[str, dict] 
+    # --- 隐藏性格属性 (Hidden Traits) ---
+    sincerity: int = 80      # 真实度 (0-100). <40 易触发背叛/欺骗
+    hidden_archetype: Optional[str] = None # 隐藏原型: GOLD_DIGGER, NPD, SCAMMER, PLAYER, PUA, MOOCHER
     
-    def get_dating_budget(self):
-        """根据资产计算约会预算"""
+    # --- 恋爱状态 ---
+    relationship_status: str 
+    relationships: Dict[str, dict] # 记录详细状态 (affection, stage, exclusivity)
+    
+    def get_relationship_stage(self, target) -> RelationshipStage:
+        """根据好感度计算关系阶段 (Stranger -> Friend -> Crush -> Lover)"""
         pass
 ```
 
@@ -87,38 +95,58 @@ class ModernProfileMixin:
 *   **Dating Engine (约会引擎)**:
     *   处理约会邀请、场景选择、突发事件（如遇到熟人）。
     *   结算：根据约会表现更新好感度和依赖度。
-*   **Conflict Engine (修罗场引擎)**:
-    *   检测冲突：当玩家在已有伴侣的情况下与其他高好感 NPC 互动被发现。
-    *   触发后果：降好感、进入“冷战”状态、触发“对质”剧情。
+*   **Risk Engine (风险/修罗场引擎)**:
+    *   **每日检测**: 针对每个有互动的 NPC 进行风险判定。
+    *   **负面原型 (Archetype Events)**:
+        *   **男性主角挑战**: 捞女 (GOLD_DIGGER) 索取、NPD 打压、情感诈骗 (SCAMMER) 破财。
+        *   **女性主角挑战**: 海王 (PLAYER) 假性分手、PUA 控制、软饭男 (MOOCHER) 吸血。
+    *   **多线冲突 (Harem Conflict)**:
+        *   **安全区**: 陌生人/朋友阶段，允许无限多线接触。
+        *   **危险区**: 暧昧/恋人阶段 (Affection > 60)，触发排他性检查。
+        *   **惩罚**: 若在危险区被发现多线操作，触发“修罗场爆发”，导致巨额压力增加和好感清零。
 
 ---
 
 ## 4. 实施步骤清单
 
 ### 阶段一：环境与数据准备
-1.  [ ] 创建分支 `feat/modern-romance`。
-2.  [ ] 建立 `static/game_configs/modern/` 目录，创建基础的城市、组织、物品 CSV 模板。
-3.  [ ] 在 `src/config.py` 中注册 `MODERN_ROMANCE` 模式。
+1.  [x] 创建分支 `feat/modern-romance`。
+2.  [x] 建立 `static/game_configs/modern/` 目录，创建基础的城市、组织、物品 CSV 模板。
+3.  [x] 在 `src/config.py` 中注册 `MODERN_ROMANCE` 模式。
 
 ### 阶段二：角色与日程系统
-1.  [ ] 实现 `ModernProfileMixin` 并集成到 `Avatar` 类。
-2.  [ ] 实现 `ScheduleGenerator`：基于职业和性格生成 NPC 的周日程表。
-3.  [ ] 改造 `Simulator`：在现代模式下切换为“日循环”逻辑，消耗 `energy` 执行行动。
+1.  [x] 实现 `ModernProfileMixin` 并集成到 `Avatar` 类 (包含 Hidden Traits)。
+2.  [x] 实现 `ScheduleGenerator`：基于职业和性格生成 NPC 的周日程表。
+3.  [x] 改造 `Simulator`：在现代模式下切换为“日循环”逻辑，消耗 `energy` 执行行动。
 
 ### 阶段三：通讯与约会功能
-1.  [ ] 开发 `ChatManager`：集成 LLM，支持生成“发送消息”和“回复消息”的内容。
-    *   [ ] 编写 `templates/modern_chat.txt` Prompt 模板。
-2.  [ ] 开发 `DateManager`：
-    *   [ ] 实现地点互动逻辑（花钱/花精力 -> 获得好感/属性）。
-    *   [ ] 实现邀约机制（成功率受好感度和心情影响）。
+1.  [x] 开发 `ChatManager` (src/classes/modern/social_system.py)：集成 LLM，支持生成“发送消息”和“回复消息”的内容。
+    *   [x] 编写 `templates/modern_chat.txt` Prompt 模板。
+2.  [x] 开发 `DateManager`：
+    *   [x] 实现地点互动逻辑（花钱/花精力 -> 获得好感/属性）。
+    *   [x] 实现邀约机制（成功率受好感度和心情影响）。
 
-### 阶段四：修罗场与事件
-1.  [ ] 实现 `ConflictSystem`：定义“撞车”判定逻辑和嫉妒值增长公式。
-2.  [ ] 编写突发事件库（`static/game_configs/modern/events.json`），如“前任复合”、“被上司刁难”等。
+### 阶段四：风险与修罗场系统 (Risk & Conflict)
+1.  [x] 实现 `RelationshipRiskEngine` 基础框架。
+2.  [x] 实现多线冲突检测 (`_check_harem_conflict`)：安全区 vs 危险区逻辑。
+3.  [x] 完善负面原型逻辑 (Archetype Logic)：
+    *   [x] **通用**: 实现 `Sincerity` (真实度) 对互动成功率的影响。
+    *   [x] **男性主角剧本**:
+        *   [x] 实现 `GOLD_DIGGER` (捞女) 索取事件。
+        *   [x] 实现 `NPD` (自恋型) 打压/煤气灯效应事件。
+        *   [x] 实现 `SCAMMER` (诈骗) 破财事件。
+    *   [x] **女性主角剧本**:
+        *   [x] 实现 `PLAYER` (海王) 暧昧/失踪事件。
+        *   [x] 实现 `PUA` (控制狂) 精神控制事件 (降低 Confidence/Charm)。
+        *   [x] 实现 `MOOCHER` (软饭男) 借钱/依赖事件。
+4.  [x] 实现情感博弈机制 (Emotional Dynamics)：
+    *   [x] **爱的滋养**: 真正爱你的 NPC 提供精力/心情恢复 (Nourishment)。
+    *   [x] **吃的亏**: 负面互动导致属性永久下降或状态异常 (Suffering)。
+5.  [x] 编写突发事件库 (`static/game_configs/modern/events.json`)。
 
 ### 阶段五：UI 与体验适配 (Web/Frontend)
-1.  [ ] 前端增加“手机”界面：用于显示聊天记录、朋友圈。
-2.  [ ] 调整主界面布局：显示精力条、金钱、日程表。
+1.  [x] 前端增加“手机”界面：用于显示聊天记录、朋友圈。
+2.  [x] 调整主界面布局：显示精力条、金钱、日程表。
 
 ---
 
@@ -135,4 +163,3 @@ class ModernProfileMixin:
 ### 5.3 经济系统平衡
 *   **问题**: 玩家可能通过“刷钱”导致恋爱难度降低。
 *   **方案**: 引入“通货膨胀”机制（随着好感度提升，NPC 对礼物的要求变高）和“时间互斥”（赚钱必须消耗大量时间，导致没时间陪伴，好感自然下降）。
-

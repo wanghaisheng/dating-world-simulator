@@ -7,6 +7,12 @@
 from pathlib import Path
 
 from omegaconf import OmegaConf
+from enum import Enum
+
+class GameMode(Enum):
+    OPEN_WORLD = "open_world"
+    THOUSAND_ILLUSIONS = "thousand_illusions"
+    MODERN_ROMANCE = "modern_romance"
 
 from src.config.data_paths import get_data_paths
 from src.i18n.locale_registry import get_default_locale, normalize_locale_code
@@ -36,6 +42,20 @@ def load_config():
     # 运行时用户数据目录由 data_paths 注入，不再写在静态配置里。
     config.paths = OmegaConf.create({})
     config.paths.saves = get_data_paths().saves_dir
+
+    # 动态调整配置路径（针对不同游戏模式）
+    if hasattr(config, "game") and hasattr(config.game, "mode"):
+        # 如果是现代都市模式，使用特定的配置目录
+        if config.game.mode == GameMode.MODERN_ROMANCE.value:
+            modern_config_path = static_path / "game_configs" / "modern"
+            if modern_config_path.exists():
+                if hasattr(config, "paths"):
+                    config.paths["shared_game_configs"] = str(modern_config_path)
+
+    # 把paths下的所有值pathlib化
+    if hasattr(config, "paths"):
+        for key, value in config.paths.items():
+            config.paths[key] = Path(value)
     
     return config
 

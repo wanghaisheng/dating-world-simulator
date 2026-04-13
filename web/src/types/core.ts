@@ -136,6 +136,31 @@ export interface AvatarDetail extends EntityBase {
     sect_alignment?: string;
     sect_orthodoxy?: string;
   } | null;
+  modern_profile?: ModernProfile;
+}
+
+export interface ModernProfile {
+  occupation: string;
+  education: string;
+  mbti: string;
+  hobbies: string[];
+  fashion_style: string;
+
+  // Dynamic
+  energy: number;
+  stress: number;
+  mood: number;
+  assets: number;
+  social_status: number;
+
+  // Relationship
+  relationship_status: string;
+  sincerity: number;
+  hidden_archetype?: string;
+
+  // Schedule & Relations
+  daily_schedule: Record<number, string>;
+  relationships: Record<string, { affection: number; status?: string }>;
 }
 
 export interface SectInfo extends EffectEntity {

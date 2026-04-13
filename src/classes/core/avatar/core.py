@@ -52,6 +52,7 @@ from src.classes.gender import Gender
 from src.classes.effect import EffectsMixin
 from src.classes.core.avatar.inventory_mixin import InventoryMixin
 from src.classes.core.avatar.action_mixin import ActionMixin
+from src.classes.core.avatar.modern_mixin import ModernProfileMixin, ModernProfile
 
 persona_num = CONFIG.avatar.persona_num
 
@@ -63,6 +64,7 @@ class Avatar(
     EffectsMixin,
     InventoryMixin,
     ActionMixin,
+    ModernProfileMixin,
 ):
     """
     NPC的类。
@@ -152,6 +154,15 @@ class Avatar(
 
     # 拥有的洞府列表（不参与序列化，通过 load_game 重建）
     owned_regions: List["CultivateRegion"] = field(default_factory=list, init=False)
+
+    # 现代都市设定数据
+    modern_profile: Optional[ModernProfile] = field(default=None)
+
+    def __post_init__(self):
+        # 自动根据游戏模式初始化 ModernProfile
+        from src.utils.config import CONFIG, GameMode
+        if CONFIG.game.mode == GameMode.MODERN_ROMANCE.value:
+            self.ensure_modern_profile()
 
     def occupy_region(self, region: "CultivateRegion") -> None:
         """

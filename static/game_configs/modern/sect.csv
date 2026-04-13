@@ -1,0 +1,6 @@
+id,name_id,desc_id,name,desc,member_act_style,alignment,weight,preferred_weapon,effects,rank_names
+,名称ID,描述ID,,宗门名称与描述,宗门成员行事风格,阵营(正/中立/邪),权重(默认1),倾向兵器类型,effects(JSON形式，支持宽松格式，见effects.py说明),自定义职位(掌门;长老;内门;外门)
+1,SECT_1_NAME,SECT_1_DESC,星耀科技,全球领先的科技巨头，以创新和高薪著称。,"理性,高效",RIGHTEOUS,1,PROGRAMMING,"{extra_work_efficiency: 0.2}",CEO;CTO;高级工程师;工程师
+2,SECT_2_NAME,SECT_2_DESC,蓝海资本,掌控着巨大财富的金融帝国，竞争残酷。,"激进,逐利",EVIL,1,FINANCE,"{extra_money_gain: 0.3}",董事长;合伙人;投资经理;分析师
+3,SECT_3_NAME,SECT_3_DESC,国立大学,学术氛围浓厚，适合潜心研究。,"温和,严谨",NEUTRAL,1,ACADEMIC,"{extra_learning_speed: 0.2}",校长;教授;讲师;助教
+4,SECT_4_NAME,SECT_4_DESC,潮流传媒,引领时尚潮流，充满艺术气息。,"感性,自由",NEUTRAL,1,ART,"{extra_charm_gain: 0.2}",总监;主编;资深编辑;实习生

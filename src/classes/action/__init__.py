@@ -46,6 +46,7 @@ from .govern import Govern
 from .temper import Temper
 from .plant import Plant
 from .sect_mission import SectMission
+from .modern_actions import WorkAction, SleepAction, LeisureAction, StudyAction, CommuteAction
 
 # 注册到 ActionRegistry（标注是否为实际可执行动作）
 register_action(actual=False)(Action)
@@ -91,6 +92,11 @@ register_action(actual=True)(Govern)
 register_action(actual=True)(Temper)
 register_action(actual=True)(Plant)
 register_action(actual=True)(SectMission)
+register_action(actual=True)(WorkAction)
+register_action(actual=True)(SleepAction)
+register_action(actual=True)(LeisureAction)
+register_action(actual=True)(StudyAction)
+register_action(actual=True)(CommuteAction)
 # Talk 已移动到 mutual_action 模块，在那里注册
 
 __all__ = [
@@ -139,4 +145,9 @@ __all__ = [
     "Temper",
     "Plant",
     "SectMission",
+    "WorkAction",
+    "SleepAction",
+    "LeisureAction",
+    "StudyAction",
+    "CommuteAction",
 ]

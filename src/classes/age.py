@@ -71,14 +71,29 @@ class Age:
         return max(0, (current_month_stamp - birth_month_stamp) // 12)
 
     def update_age(self, current_month_stamp: MonthStamp, birth_month_stamp: MonthStamp):
-        self.age = self.calculate_age(current_month_stamp, birth_month_stamp)
+        """
+        根据当前时间更新年龄
+        """
+        # 计算经过的月份
+        diff = int(current_month_stamp) - int(birth_month_stamp)
+        
+        # Determine ticks per year dynamically
+        ticks_per_year = 12
+        if hasattr(current_month_stamp, "get_time_config"):
+            conf = current_month_stamp.get_time_config()
+            ticks_per_year = conf["ticks_per_year"]
+        
+        self.age = diff // ticks_per_year
 
     def get_lifespan_progress(self, realm=None) -> tuple[int, int]:
-        return self.age, self.max_lifespan
+        """返回 (当前年龄, 期望寿命)。realm为空时使用当前最大寿元。"""
+        expected = self.max_lifespan if realm is None else self.get_expected_lifespan(realm)
+        return self.age, expected
 
     def is_elderly(self, realm=None) -> bool:
-        return self.age >= self.max_lifespan
-
+        """是否超过期望寿命。realm为空时使用当前最大寿元。"""
+        expected = self.max_lifespan if realm is None else self.get_expected_lifespan(realm)
+        return self.age >= expected
     def __str__(self) -> str:
         return f"{self.age}/{self.max_lifespan}"
 

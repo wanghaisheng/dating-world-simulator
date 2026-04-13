@@ -258,6 +258,12 @@ class AvatarLoadMixin:
         avatar.children = [Mortal.from_dict(child_data) for child_data in children_data]
         avatar.relation_start_dates = data.get("relation_start_dates", {})
 
+        # 恢复modern_profile
+        modern_profile_data = data.get("modern_profile")
+        if modern_profile_data:
+            from src.classes.core.avatar.modern_mixin import ModernProfile
+            avatar.modern_profile = ModernProfile(**modern_profile_data)
+
         # 加载完成后重新计算effects（确保数值正确）
         avatar.recalc_effects()
         

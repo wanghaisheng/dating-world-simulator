@@ -1,0 +1,5 @@
+title,title_id,name_id,desc_id,desc
+标题,标题ID,名称ID,描述ID,描述
+简介,WORLD_INFO_INTRO_TITLE,WORLD_INFO_INTRO_NAME,WORLD_INFO_INTRO_DESC,这是一个充满机遇与挑战的现代都市。
+社会阶层,WORLD_INFO_REALM_TITLE,WORLD_INFO_REALM_NAME,WORLD_INFO_REALM_DESC,社会地位从低到高：初入职场、中层骨干、行业精英、商界领袖。每个阶段都有不同的挑战。
+健康,WORLD_INFO_LIFESPAN_TITLE,WORLD_INFO_LIFESPAN_NAME,WORLD_INFO_LIFESPAN_DESC,保持身心健康至关重要。压力过大可能导致生病，影响工作和生活。

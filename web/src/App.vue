@@ -17,6 +17,7 @@ import LoadingOverlay from './components/LoadingOverlay.vue'
 import menuIcon from '@/assets/icons/ui/lucide/menu.svg'
 import playIcon from '@/assets/icons/ui/lucide/play.svg'
 import pauseIcon from '@/assets/icons/ui/lucide/pause.svg'
+import PhonePanel from './components/game/panels/modern/PhonePanel.vue'
 
 // Composables
 import { useGameInit } from './composables/useGameInit'
@@ -214,6 +215,13 @@ watch(sidebarWidth, width => {
             <aside class="sidebar" :style="{ width: sidebarWidth + 'px' }">
               <EventPanel />
             </aside>
+
+            <!-- Modern Phone Panel -->
+            <PhonePanel
+              v-if="uiStore.detailData && uiStore.detailData.modern_profile"
+              :avatar-id="uiStore.detailData.id"
+              :profile="uiStore.detailData.modern_profile"
+            />
           </div>
         </div>
 

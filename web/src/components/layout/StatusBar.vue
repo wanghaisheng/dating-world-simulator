@@ -4,6 +4,8 @@ import { useSocketStore } from '../../stores/socket'
 import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import StatusWidget from './StatusWidget.vue'
+import { useUiStore } from '../../stores/ui'
+import ModernStats from '../game/panels/modern/ModernStats.vue'
 
 import RankingModal from '../game/panels/RankingModal.vue'
 import TournamentModal from '../game/panels/TournamentModal.vue'
@@ -31,6 +33,8 @@ const { t, locale } = useI18n()
 const store = useWorldStore()
 const socketStore = useSocketStore()
 const avatarOverviewStore = useAvatarOverviewStore()
+const uiStore = useUiStore()
+const message = useMessage()
 const showSelector = ref(false)
 const showTimeOverviewModal = ref(false)
 const showWorldInfoModal = ref(false)
@@ -96,6 +100,13 @@ async function openAvatarOverview() {
         @trigger-click="showTimeOverviewModal = true"
       />
 
+      <!-- Modern Stats (Shows only if selected avatar has modern profile) -->
+      <ModernStats
+        v-if="uiStore.detailData && uiStore.detailData.modern_profile"
+        :profile="uiStore.detailData.modern_profile"
+      />
+
+      <!-- 天地灵机 -->
       <StatusWidget
         v-if="store.currentPhenomenon"
         :label="`[${store.currentPhenomenon.name}]`"

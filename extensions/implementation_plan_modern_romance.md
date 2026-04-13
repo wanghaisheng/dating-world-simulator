@@ -223,6 +223,8 @@ class ModernProfileMixin:
 
 1. **README.md 更新**: ✅ 已完成 - 在主 README.md 中添加了现代恋爱模式扩展说明
 2. **modern_avatar.py**: ✅ 已完成 - 功能已合并到 `src/classes/core/avatar/modern_mixin.py`，无需单独文件
-3. **Server API 集成**: ⏳ 待完成 - SocialAppManager 等功能需要通过 command_handlers 模式集成到 server 端
-   - 当前状态：SocialAppManager 已导入到 main.py，但未通过 command_handlers 模式暴露 API
-   - 需要添加：社交软件滑动、聊天发送、约会邀约等 API 端点
+3. **Server API 集成**: ✅ 已完成 - 通过 command_handlers 模式集成现代模式 API
+   - 在 command_handlers.py 中添加了现代模式相关参数和命令处理器
+   - 添加了 run_modern_swipe、run_modern_ice_break、run_modern_send_chat、run_modern_propose_date、run_modern_start_date 等命令
+   - 在 main.py 中添加了 get_social_app_manager 函数
+   - SocialAppManager 仅在现代模式下初始化
